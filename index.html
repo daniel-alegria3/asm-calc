@@ -9,11 +9,35 @@
             margin: 0 auto;
             padding: 20px;
         }
-        .calculator {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
+
+        .wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
         }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 4fr;
+            grid-template-rows: 100px 100px;
+            gap: 10px;
+            margin: 20px;
+        }
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            // border: 1px solid #ccc;
+            // background-color: #f0f0f0;
+        }
+        .middle-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
         .display {
             padding: 10px;
             font-size: 1.5em;
@@ -26,114 +50,110 @@
             padding: 15px;
             font-size: 1.2em;
         }
-        .equals {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .sqrt {
-            grid-column: span 2;
-        }
     </style>
 </head>
 <body>
-    <!-- <h1>Assembly Calculator</h1> -->
-    <div class="calculator">
-        <input type="text" id="display" class="display" style="grid-column: span 7;" readonly>
-        <!-- <input type="text" id="operator" class="display" style="grid-column: span 1;" readonly> -->
-        <!-- <input type="text" id="result" class="display" readonly> -->
+    <h1 style="text-align: center;">Assembly Calculator</h1>
+    <div class="wrapper">
+        <div class="grid">
+            <!-- <input type="text" id="operator" class="display" style="grid-column: span 1;" readonly> -->
+            <!-- <input type="text" id="result" class="display" readonly> -->
 
-        <label for="base" style="
-            width: 100%;
-            box-sizing: border-box;
-            padding: 7px;
-            font-size: 1em;
-            text-align: right;
-            grid-column: span 6;
-        ">BASE</label>
-        <input type="text" id="base" style="
-            width: 100%;
-            box-sizing: border-box;
-            padding: 7px;
-            font-size: 1em;
-            text-align: left;
-            grid-column: span 1;
-        "value=10>
+            <div class="cell"></div>
+            <div class="cell">
+                <input type="text" id="num1" class="display" style="">
+            </div>
 
-        <button onclick="appendToDisplay('7')">7</button>
-        <button onclick="appendToDisplay('8')">8</button>
-        <button onclick="appendToDisplay('9')">9</button>
-        <button onclick="">DEL</button>
-        <button onclick="clearDisplay()">AC</button>
-        <button onclick="appendToDisplay('(')">(</button>
-        <button onclick="appendToDisplay(')')">)</button>
+            <div class="cell">
+                <select style="text-align: center;" id="op">
+                    <option value="">Op</option>
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                    <option value="*">-</option>
+                    <option value="/">-</option>
+                    <!-- <option value="^">-</option> -->
+                </select>
+            </div>
+            <div class="cell">
+                <input type="text" id="num2" class="display" style="">
+            </div>
+        </div>
 
-        <button onclick="appendToDisplay('4')">4</button>
-        <button onclick="appendToDisplay('5')">5</button>
-        <button onclick="appendToDisplay('6')">6</button>
-        <button onclick="setOperation('*')">*</button>
-        <button onclick="setOperation('/')">/</button>
-        <button onclick="appendToDisplay('[')">[</button>
-        <button onclick="appendToDisplay(']')">]</button>
+        <div class="middle-grid">
+            <label for="base" style="
+                width: 100%;
+                box-sizing: border-box;
+                padding: 7px;
+                font-size: 1em;
+                text-align: right;
+                grid-column: span 6;
+            ">BASE</label>
+            <input type="text" id="base" style="
+                width: 100%;
+                box-sizing: border-box;
+                padding: 7px;
+                font-size: 1em;
+                text-align: left;
+                grid-column: span 1;
+            "value=10>
+            <button onclick="calculate()" class="equals">=</button>
+        </div>
 
-        <button onclick="appendToDisplay('1')">1</button>
-        <button onclick="appendToDisplay('2')">2</button>
-        <button onclick="appendToDisplay('3')">3</button>
-        <button onclick="setOperation('+')">+</button>
-        <button onclick="setOperation('-')">-</button>
-        <button onclick="appendToDisplay('{')">{</button>
-        <button onclick="appendToDisplay('}')">}</button>
+        <div class="grid">
+            <div class="cell"></div>
+            <div class="cell">
+                <input type="text" id="out1" class="display" style="" disabled>
+            </div>
 
-        <button onclick="appendToDisplay('0')">0</button>
-        <button onclick="appendToDisplay('.')">.</button>
-        <button onclick="calculate()" class="equals">=</button>
-        <button onclick="appendToDisplay('sqrt ')" style="grid-column: span 2;">sqrt</button>
-        <button onclick="">undo</button>
-        <button onclick="">redo</button>
+            <div class="cell">
+                <select id="op_mirror" disabled>
+                    <option value="">Op</option>
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                    <option value="*">-</option>
+                    <option value="/">-</option>
+                    <!-- <option value="^">-</option> -->
+                </select>
+            </div>
+            <div class="cell">
+                <input type="text" id="out2" class="display" style="" disabled>
+            </div>
+        </div>
     </div>
 
     <script>
-        let currentInput = '';
-        let storedInput = '';
-        let operation = '';
-        const display = document.getElementById('display');
-        const base = document.getElementById('base');
-
-        function appendToDisplay(value) {
-            currentInput += value;
-            display.value = currentInput;
-        }
-
-        function clearDisplay() {
-            currentInput = '';
-            storedInput = '';
-            operation = '';
-            display.value = '';
-        }
-
-        function setOperation(op) {
-            if (currentInput !== '') {
-                storedInput = currentInput;
-                currentInput = '';
-                operation = op;
-            }
-        }
-
         function calculate() {
-            if (storedInput !== '' && currentInput !== '' && operation !== '') {
-                fetch(`/calculate?op=${operation}&a=${storedInput}&b=${currentInput}&base=${base.value}`)
+            const num1 = document.getElementById('num1');
+            const num2 = document.getElementById('num2');
+            const op = document.getElementById('op');
+            const base = document.getElementById('base');
+
+            const out1 = document.getElementById('out1');
+            const out2 = document.getElementById('out2');
+
+            if (num1.value !== '' && num2.value !== '' && op.value !== '') {
+                console.log(`${op.value}, ${num1.value}, ${num2.value}, ${base.value}`)
+                fetch(`/calculate?op=${op.value}&a=${num1.value}&b=${num2.value}&base=${base.value}`)
                     .then(response => response.json())
                     .then(data => {
-                        currentInput = data.result.toString();
-                        display.value = currentInput;
-                        storedInput = '';
-                        operation = '';
+                        console.log("data: ", data);
+                        out1.value = data.cnum1
+                        out2.value = data.cnum2
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        display.value = 'Error';
+                        <!-- display.value = 'Error'; -->
                     });
             }
         }
+    </script>
+    <script>
+        const select1 = document.getElementById('op');
+        const select2 = document.getElementById('op_mirror');
+
+        select1.addEventListener('change', () => {
+            select2.value = select1.value;
+        });
     </script>
 </body>
 </html>

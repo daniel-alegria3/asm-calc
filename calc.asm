@@ -2,34 +2,27 @@ format ELF64
 
 section '.text' executable
 
-public asm_add
-public asm_sub
-public asm_mul
-public asm_div
+public str_to_num
+public num_to_str
+
+public asm_fadd
+public asm_fsub
+public asm_fmul
 public asm_fdiv
 
-asm_add:
-    mov eax, edi
-    add eax, esi
+asm_fadd:
+    addss xmm0, xmm1
     ret
 
-asm_sub:
-    mov eax, edi
-    sub eax, esi
+asm_fsub:
+    subss xmm0, xmm1
     ret
 
-asm_mul:
-    mov eax, edi
-    imul eax, esi
-    ret
-
-asm_div:
-    mov eax, edi
-    cqo                 ; Sign-extend EAX into EDX:EAX
-    idiv esi            ; Divide EDX:EAX by ESI
+asm_fmul:
+    mulss xmm0, xmm1
     ret
 
 asm_fdiv:
-    divss xmm0, xmm1  ; Scalar Single-precision divide
+    divss xmm0, xmm1
     ret
 
