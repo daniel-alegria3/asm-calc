@@ -7,13 +7,14 @@
 #include <netinet/in.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <math.h>
 
 #define PORT 6969
 #define BUFFER_SIZE 128*1024
 
 //[ external assembly functions
-extern void str_to_base10f(char *str, float *num, int base);
-extern void base10f_to_str(float num, char *str, int base);
+// extern void str_to_base10f(char *str, float *num, int base);
+// extern void base10f_to_str(float num, char *str, int base);
 extern float asm_fadd(float a, float b);
 extern float asm_fsub(float a, float b);
 extern float asm_fmul(float a, float b);
@@ -27,6 +28,87 @@ static int server_fd = -1;
 static volatile sig_atomic_t shutdown_requested = 0;
 void signal_handler(int sig);
 void setup_signal_handlers();
+
+//[ TODO: delete this function after using it as reference
+void str_to_base10f(char *str, float *num, int base)
+{
+    char digits[] = "0123456789ABCDEF";
+
+    int len = strlen(str)-1;
+    if (len < 0) {
+        str[0] = '\0';
+        return;
+    }
+
+    int dec = 0;
+    for (char *c = str; *c != '\0'; ++c) {
+        int dig;
+        switch (*c) {
+            case '0': dig = 0; break;
+            case '1': dig = 1; break;
+            case '2': dig = 2; break;
+            case '3': dig = 3; break;
+            case '4': dig = 4; break;
+            case '5': dig = 5; break;
+            case '6': dig = 6; break;
+            case '7': dig = 7; break;
+            case '8': dig = 8; break;
+            case '9': dig = 9; break;
+            case 'a': case 'A': dig = 10; break;
+            case 'b': case 'B': dig = 11; break;
+            case 'c': case 'C': dig = 12; break;
+            case 'd': case 'D': dig = 13; break;
+            case 'e': case 'E': dig = 14; break;
+            case 'f': case 'F': dig = 15; break;
+        }
+        dec += dig * powf(base, len);
+        --len;
+        // 0F9
+    }
+
+    *num = dec;
+}
+void base10f_to_str(float num, char *str, int base)
+{
+    int dec = num;
+    char digits[] = "0123456789ABCDEF";
+    char buffer[64+1]; // enough for 32-bit int in binary + null
+
+    if (base < 2 || base > 16) {
+        str[0] = '\0';
+        return;
+    }
+
+    if (dec == 0) {
+        str[0] = '0';
+        str[1] = '\0';
+        return;
+    }
+
+    int is_negative = 0;
+    if (dec < 0 && base == 10) {
+        is_negative = 1;
+        dec = -dec;
+    }
+
+    int i = 0;
+    while (dec > 0) {
+        buffer[i++] = digits[dec % base];
+        dec /= base;
+    }
+
+    if (is_negative) {
+        buffer[i++] = '-';
+    }
+
+    // reverse the string
+    for (int j = 0; j < i; ++j) {
+        str[j] = buffer[i - j - 1];
+    }
+    str[i] = '\0';
+}
+//]
+
 
 int main() {
     int client_socket;
@@ -96,46 +178,6 @@ int main() {
     return 0;
 }
 
-// TODO: delete this function after using it as reference
-void _num_to_str(int num, char *str, int base)
-{
-    char digits[] = "0123456789ABCDEF";
-    char buffer[32+1]; // enough for 32-bit int in binary + null
-    int i = 0, j;
-
-    if (base < 2 || base > 16) {
-        str[0] = '\0';
-        return;
-    }
-
-    if (num == 0) {
-        str[0] = '0';
-        str[1] = '\0';
-        return;
-    }
-
-    int is_negative = 0;
-    if (num < 0 && base == 10) {
-        is_negative = 1;
-        num = -num;
-    }
-
-    while (num > 0) {
-        buffer[i++] = digits[num % base];
-        num /= base;
-    }
-
-    if (is_negative) {
-        buffer[i++] = '-';
-    }
-
-    // reverse the string
-    for (j = 0; j < i; ++j) {
-        str[j] = buffer[i - j - 1];
-    }
-    str[i] = '\0';
-}
-
 
 void send_response(int client_socket, const char *response) {
     char http_response[BUFFER_SIZE];
@@ -158,24 +200,18 @@ void handle_request(int client_socket, const char *request) {
         // This is simplified - in a real app you'd properly parse the URL
         char op;
         char sa[64+1], sb[64+1];
-        int base;
-        bool is_base_input = false; // TODO: pass this through GET request from html file
+        int base_l, base_r;
 
         int d;
-        if ((d = sscanf( request, "GET /calculate?op=%c&a=%[^&]&b=%[^&]&base=%d", &op, sa, sb, &base)) == 4) {
+        if ((d = sscanf(request, "GET /calculate?op=%c&a=%[^&]&b=%[^&]&bl=%d&br=%d", &op, sa, sb, &base_l, &base_r)) == 5) {
             printf("\n");
             printf("op: %c\n", op);
             printf("sa, sb: %s, %s\n", sa, sb);
-            printf("base: %d\n", base);
+            printf("base[l|r]: %d, %d\n", base_l, base_r);
 
             float a, b;
-            if (is_base_input) {
-                str_to_base10f(sa, &a, base);
-                str_to_base10f(sb, &b, base);
-            } else {
-                str_to_base10f(sa, &a, 10);
-                str_to_base10f(sb, &b, 10);
-            }
+            str_to_base10f(sa, &a, base_l);
+            str_to_base10f(sb, &b, base_l);
             printf("a, b: %f, %f\n", a, b);
 
             float result;
@@ -190,18 +226,18 @@ void handle_request(int client_socket, const char *request) {
             }
             printf("result: %f\n", result);
 
-            char sresult[64+1];
-            if (is_base_input) {
-                base10f_to_str(result, sresult, 10);
-            } else {
-                base10f_to_str(result, sresult, base);
-            }
-            printf("sresult: %s\n", sresult);
+            char cres_l[64+1];
+            char cres_r[64+1];
+            base10f_to_str(result, cres_l, base_l);
+            base10f_to_str(a, sa, base_r);
+            base10f_to_str(b, sb, base_r);
+            base10f_to_str(result, cres_r, base_r);
+            printf("cres_r: %s\n", cres_r);
 
             char response[512];
             snprintf(response, sizeof(response),
-                "{ \"res\":%f, \"cnum1\":\"%s\", \"cnum2\":\"%s\", \"cres\":\"%s\" }",
-                result, sa, sb, sresult
+                "{ \"cres_l\":\"%s\", \"cnum1\":\"%s\", \"cnum2\":\"%s\", \"cres_r\":\"%s\" }",
+                cres_l, sa, sb, cres_r
             );
             send_response(client_socket, response);
             return;
