@@ -199,7 +199,10 @@ void handle_request(int client_socket, const char *request) {
             printf("sresult: %s\n", sresult);
 
             char response[512];
-            snprintf(response, sizeof(response), "{ \"res\":%f, \"cnum1\":%s, \"cnum2\":%s, \"cres\":%s }", result, sa, sb, sresult);
+            snprintf(response, sizeof(response),
+                "{ \"res\":%f, \"cnum1\":\"%s\", \"cnum2\":\"%s\", \"cres\":\"%s\" }",
+                result, sa, sb, sresult
+            );
             send_response(client_socket, response);
             return;
         }
