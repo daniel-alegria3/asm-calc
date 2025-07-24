@@ -1,6 +1,13 @@
-calc: main.c calc.o
-	gcc main.c calc.o -lm -ggdb -o $@
+calc: calc.c ops.o
+	gcc -lm -ggdb -o $@ $^
 
-calc.o: calc.asm
-	fasm calc.asm $@
+ops.o: ops.asm
+	fasm $< $@
+
+
+test: calc.c ops_test.o
+	gcc -lm -ggdb -o $@ $^
+
+ops_test.o: ops_test.c
+	gcc -c -lm -ggdb $^
 

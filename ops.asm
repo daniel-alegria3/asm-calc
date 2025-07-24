@@ -2,8 +2,8 @@ format ELF64
 
 section '.text' executable
 
-; public str_to_base10f
-; public base10f_to_str
+public str_to_base10f
+public base10f_to_str
 
 public asm_fadd
 public asm_fsub
