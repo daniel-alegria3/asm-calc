@@ -10,7 +10,7 @@
             padding: 20px;
         }
 
-        .wrapper {
+        .calc {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -31,30 +31,48 @@
             // border: 1px solid #ccc;
             // background-color: #f0f0f0;
         }
+        .middle-grid-box {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+        }
         .middle-grid {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 15px;
         }
-
         .display {
             padding: 10px;
             font-size: 1.5em;
             text-align: right;
             border: 1px solid #ccc;
         }
+
         button {
             width: 100%;
             box-sizing: border-box;
             padding: 15px;
             font-size: 1.2em;
         }
+        input:disabled {
+            background-color: #f5f5f5;
+            color: #000;
+            border-color: #ddd;
+            cursor: not-allowed;
+        }
+        select:disabled {
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
     <h1 style="text-align: center;">Assembly Calculator</h1>
-    <div class="wrapper">
+    <div class="calc">
         <div class="grid">
             <!-- <input type="text" id="operator" class="display" style="grid-column: span 1;" readonly> -->
             <!-- <input type="text" id="result" class="display" readonly> -->
@@ -82,31 +100,52 @@
 
             <div class="cell"></div>
             <div class="cell">
-                <input type="text" id="cres_l" class="display" style="">
+                <input type="text" id="cres_l" class="display" style="" disabled>
             </div>
         </div>
 
-        <div class="middle-grid">
-            <label for="base_l" style="
-                width: 100%;
-                box-sizing: border-box;
-                padding: 7px;
-                font-size: 1em;
-                text-align: right;
-                grid-column: span 6;
-            ">BASE IZQ</label>
-            <input type="text" id="base_l" style="
-                width: 100%;
-                box-sizing: border-box;
-                padding: 7px;
-                font-size: 1em;
-                text-align: left;
-                grid-column: span 1;
-            "value=10>
-        </div>
+        <div class="middle-grid-box">
+            <div class="middle-grid">
+                <label for="base_l" style="
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 7px;
+                    font-size: 1em;
+                    text-align: right;
+                    grid-column: span 6;
+                ">BASE IZQ</label>
+                <input type="text" id="base_l" style="
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 7px;
+                    font-size: 1em;
+                    text-align: left;
+                    grid-column: span 1;
+                "value=10>
+            </div>
 
-        <div class="middle-grid">
-            <button onclick="calculate()" class="equals">=</button>
+            <div class="middle-grid">
+                <button onclick="calculate()" class="equals">=</button>
+            </div>
+
+            <div class="middle-grid">
+                <label for="base_r" style="
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 7px;
+                    font-size: 1em;
+                    text-align: right;
+                    grid-column: span 6;
+                ">BASE DER</label>
+                <input type="text" id="base_r" style="
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 7px;
+                    font-size: 1em;
+                    text-align: left;
+                    grid-column: span 1;
+                "value=10>
+            </div>
         </div>
 
         <div class="grid">
@@ -133,27 +172,8 @@
 
             <div class="cell"></div>
             <div class="cell">
-                <input type="text" id="cres_r" class="display" style="">
+                <input type="text" id="cres_r" class="display" style="" disabled>
             </div>
-        </div>
-
-        <div class="middle-grid">
-            <label for="base_r" style="
-                width: 100%;
-                box-sizing: border-box;
-                padding: 7px;
-                font-size: 1em;
-                text-align: right;
-                grid-column: span 6;
-            ">BASE DER</label>
-            <input type="text" id="base_r" style="
-                width: 100%;
-                box-sizing: border-box;
-                padding: 7px;
-                font-size: 1em;
-                text-align: left;
-                grid-column: span 1;
-            "value=10>
         </div>
     </div>
 
@@ -194,7 +214,14 @@
             }
             */
         }
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                calculate();
+            }
+        });
     </script>
+
     <script>
         const select1 = document.getElementById('op');
         const select2 = document.getElementById('op_mirror');
