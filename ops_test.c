@@ -1,22 +1,17 @@
-//[ TODO: delete this functions after using it as reference
-#include <string.h>
 #include <stdio.h>
-#include <math.h>
 
+//[
 void str_to_base10f(char *str, float *num, int base)
 {
-    char digits[] = "0123456789ABCDEF";
+    int dig;
+    int dot_found = 0;
+    int sign = 1;
+    float f = 0;
+    float div = 1.0;
 
-    int len = strlen(str)-1;
-    if (len < 0) {
-        str[0] = '\0';
-        return;
-    }
-
-    int dec = 0;
     for (char *c = str; *c != '\0'; ++c) {
-        int dig;
         switch (*c) {
+            case ' ': dig = -1; break;
             case '0': dig = 0; break;
             case '1': dig = 1; break;
             case '2': dig = 2; break;
@@ -33,41 +28,54 @@ void str_to_base10f(char *str, float *num, int base)
             case 'd': case 'D': dig = 13; break;
             case 'e': case 'E': dig = 14; break;
             case 'f': case 'F': dig = 15; break;
+            case '-': dig = -1; sign = -1; break;
+            case '.': dig = -1; dot_found = 1; break;
         }
-        dec += dig * powf(base, len);
-        --len;
-        // 0F9
+        if (dig == -1)
+            continue;
+        if (!dot_found) {
+            f *= base;
+            f += dig;
+        } else {
+            div *= base;
+            f += dig/div;
+        }
     }
 
-    *num = dec;
+    *num = f * sign;
 }
 
 
 void base10f_to_str(float num, char *str, int base)
 {
     int dec = num;
+    float f = num - dec;
+
     char digits[] = "0123456789ABCDEF";
-    char buffer[64+1]; // enough for 32-bit int in binary + null
+    char buffer[128+1];
 
     if (base < 2 || base > 16) {
         str[0] = '\0';
         return;
     }
 
-    if (dec == 0) {
+    if (dec == 0 && f == 0) {
         str[0] = '0';
         str[1] = '\0';
         return;
     }
 
     int is_negative = 0;
-    if (dec < 0 && base == 10) {
+    if (dec < 0) {
         is_negative = 1;
         dec = -dec;
+        f = -f;
     }
 
     int i = 0;
-    while (dec > 0) {
+    if (dec == 0) {
+        buffer[i++] = '0';
+    } else while (dec > 0) {
         buffer[i++] = digits[dec % base];
         dec /= base;
     }
@@ -80,6 +88,21 @@ void base10f_to_str(float num, char *str, int base)
     for (int j = 0; j < i; ++j) {
         str[j] = buffer[i - j - 1];
     }
+
+    // Decimal part
+    if (f > 0.0f) {
+        str[i++] = '.';
+
+        int precision = 6;
+        int digit;
+        while (precision-- > 0 && f > 0.0f) {
+            f *= base;
+            digit = (int)f;
+            str[i++] = digits[digit];
+            f -= digit;
+        }
+    }
+
     str[i] = '\0';
 }
 //]

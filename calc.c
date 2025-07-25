@@ -129,7 +129,7 @@ void handle_request(int csocket, const char *request) {
     // Calculate operation
     if (strstr(request, "GET /calculate")) {
         char op;
-        char sa[64+1], sb[64+1];
+        char sa[128+1], sb[128+1];
         int base_l, base_r;
 
         // Extract operation and operands from query string
@@ -154,14 +154,15 @@ void handle_request(int csocket, const char *request) {
                     send_response(csocket, "{\"error\":\"Invalid operation\"}");
                     return;
             }
-            printf("result: %f\n", result);
+            printf("cres_l: %f\n", result);
 
-            char cres_l[64+1];
-            char cres_r[64+1];
+            char cres_l[128+1];
+            char cres_r[128+1];
             base10f_to_str(result, cres_l, base_l);
             base10f_to_str(a, sa, base_r);
             base10f_to_str(b, sb, base_r);
             base10f_to_str(result, cres_r, base_r);
+            printf("ca, cb: %s, %s\n", sa, sb);
             printf("cres_r: %s\n", cres_r);
 
             char response[512];
