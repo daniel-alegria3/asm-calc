@@ -28,7 +28,7 @@ void str_to_base10f(char *str, float *num, int base)
             case 'd': case 'D': dig = 13; break;
             case 'e': case 'E': dig = 14; break;
             case 'f': case 'F': dig = 15; break;
-            case '-': dig = -1; sign = -1; break;
+            case '-': dig = -1; sign = -1; break; // TODO?: check if negative sign is the first thing
             case '.': dig = -1; dot_found = 1; break;
         }
         if (dig == -1)
@@ -48,35 +48,34 @@ void str_to_base10f(char *str, float *num, int base)
 
 void base10f_to_str(float num, char *str, int base)
 {
-    int dec = num;
-    float f = num - dec;
-
-    char digits[] = "0123456789ABCDEF";
-    char buffer[128+1];
-
+    if (num == 0) {
+        str[0] = '0';
+        str[1] = '\0';
+        return;
+    }
     if (base < 2 || base > 16) {
         str[0] = '\0';
         return;
     }
 
-    if (dec == 0 && f == 0) {
-        str[0] = '0';
-        str[1] = '\0';
-        return;
-    }
-
+    int dec;
+    float f;
     int is_negative = 0;
-    if (dec < 0) {
+    char buffer[128+1];
+    char DIGITS[] = "0123456789ABCDEF";
+
+    if (num < 0) {
         is_negative = 1;
-        dec = -dec;
-        f = -f;
+        num = -num;
     }
+    dec = num;
+    f = num - dec;
 
     int i = 0;
     if (dec == 0) {
         buffer[i++] = '0';
     } else while (dec > 0) {
-        buffer[i++] = digits[dec % base];
+        buffer[i++] = DIGITS[dec % base];
         dec /= base;
     }
 
@@ -85,8 +84,8 @@ void base10f_to_str(float num, char *str, int base)
     }
 
     // reverse the string
-    for (int j = 0; j < i; ++j) {
-        str[j] = buffer[i - j - 1];
+    for (int j = 0, k = i-1; j < i; ++j, --k) {
+        str[j] = buffer[k];
     }
 
     // Decimal part
@@ -98,7 +97,7 @@ void base10f_to_str(float num, char *str, int base)
         while (precision-- > 0 && f > 0.0f) {
             f *= base;
             digit = (int)f;
-            str[i++] = digits[digit];
+            str[i++] = DIGITS[digit];
             f -= digit;
         }
     }
