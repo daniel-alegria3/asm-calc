@@ -10,7 +10,7 @@
 #include <math.h>
 
 #define PORT 6969
-#define BUFFER_SIZE 128*1024
+#define BUFFER_SIZE 128*1024 // 128 kb?
 
 //[ external functions
 extern void str_to_base10f(char *str, float *num, int base);

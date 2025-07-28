@@ -226,8 +226,9 @@ asm_fmul:
     ret
 
 asm_fdiv:
-    xorps xmm2, xmm2
-    comiss xmm1, xmm2
+    ; xmm0, xmm1
+    xorps xmm2, xmm2; xmm2 = 0.0
+    comiss xmm1, xmm2; es el divisor = 0
     jz .div_by_zero
 
     divss   xmm0, xmm1

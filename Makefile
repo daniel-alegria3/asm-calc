@@ -17,8 +17,11 @@ ops_test.txt: ops_test.o
 	objdump -d -M intel $< > $@
 
 
+informe.pdf: informe.typ
+	typst compile $<
+
 clean:
-	rm -f *.o ops_test.txt ops_test.s
+	rm -f calc test *.o ops_test.txt ops_test.s
 
 .PHONY: clean
 
