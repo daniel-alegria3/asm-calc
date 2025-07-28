@@ -226,9 +226,16 @@ asm_fmul:
     ret
 
 asm_fdiv:
-    divss xmm0, xmm1
+    xorps xmm2, xmm2
+    comiss xmm1, xmm2
+    jz .div_by_zero
+
+    divss   xmm0, xmm1
     ret
 
+    .div_by_zero:
+    xorps   xmm0, xmm0
+    ret
 
 ;;;;;;; HELPER PROCEDURES
 switch_char:

@@ -191,6 +191,10 @@
             const cres_r = document.getElementById('cres_r');
             const base_r = document.getElementById('base_r');
 
+            if (op.value === '/' && parseFloat(num2.value) == 0) {
+                return;
+            }
+
             if (num1.value !== '' && num2.value !== '' && op.value !== '' && base_l.value !== '' && base_r.value !== '') {
                 console.log(`${op.value}, ${num1.value}, ${num2.value}, ${base_l.value}, ${base_r.value}`)
                 fetch(`/calculate?op=${op.value}&a=${num1.value}&b=${num2.value}&bl=${base_l.value}&br=${base_r.value}`)
